@@ -40,23 +40,41 @@ var topicId = "";
 var logStatus = "Default";
 
 /* configure our env based on prompted input */
+// async function init() {
+//   inquirer.prompt(questions).then(async function(answers) {
+//     try {
+//       logStatus = answers.status;
+//       configureAccount(answers.account, answers.key);
+//       if (answers.existingTopicId != undefined) {
+//         configureExistingTopic(answers.existingTopicId);
+//       } else {
+//         await configureNewTopic();
+//       }
+//       /* run & serve the express app */
+//       runChat();
+//     } catch (error) {
+//       log("ERROR: init() failed", error, logStatus);
+//       process.exit(1);
+//     }
+//   });
+// }
+
+
 async function init() {
-  inquirer.prompt(questions).then(async function(answers) {
+  
     try {
-      logStatus = answers.status;
-      configureAccount(answers.account, answers.key);
-      if (answers.existingTopicId != undefined) {
-        configureExistingTopic(answers.existingTopicId);
-      } else {
-        await configureNewTopic();
-      }
+      logStatus = "default"
+      configureAccount("", "");
+      
+      await configureNewTopic();
+      
       /* run & serve the express app */
       runChat();
     } catch (error) {
       log("ERROR: init() failed", error, logStatus);
       process.exit(1);
     }
-  });
+  ;
 }
 
 function runChat() {
