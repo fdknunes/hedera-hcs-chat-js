@@ -64,7 +64,7 @@ async function init() {
   
     try {
       logStatus = "default"
-      configureAccount("", "");
+      configureAccount(process.env.ACCOUNT_ID, process.env.PRIVATE_KEY);
       
       await configureNewTopic();
       
@@ -81,7 +81,9 @@ function runChat() {
   app.use(express.static("public"));
   http.listen(0, function() {
     const randomInstancePort = http.address().port;
-    open("http://localhost:" + randomInstancePort);
+    // open("http://localhost:" + randomInstancePort);
+    open("https://hedera-hcs-chat-js.onrender.com:" + randomInstancePort);
+    
   });
   subscribeToMirror();
   io.on("connection", function(client) {
