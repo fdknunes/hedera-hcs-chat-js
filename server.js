@@ -80,14 +80,14 @@ async function init() {
 function runChat() {
   app.use(express.static("public"));
   const port = process.env.PORT || 3001;
-  app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+  // app.listen(port, () => console.log(`Example app listening on port ${port}!`));
   
-  // http.listen(0, function() {
-  //   const randomInstancePort = http.address().port;
-  //   // open("http://localhost:" + randomInstancePort);
-  //  // open("https://hedera-hcs-chat-js.onrender.com:" + randomInstancePort);
+  http.listen(port, function() {
+    const randomInstancePort = http.address().port;
+    // open("http://localhost:" + randomInstancePort);
+   // open("https://hedera-hcs-chat-js.onrender.com:" + randomInstancePort);
     
-  // });
+  });
   subscribeToMirror();
   io.on("connection", function(client) {
     io.emit(
