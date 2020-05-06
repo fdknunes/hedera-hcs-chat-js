@@ -87,7 +87,7 @@ function runChat() {
   //   // open("http://localhost:" + randomInstancePort);
   //  // open("https://hedera-hcs-chat-js.onrender.com:" + randomInstancePort);
     
-  });
+  // });
   subscribeToMirror();
   io.on("connection", function(client) {
     io.emit(
