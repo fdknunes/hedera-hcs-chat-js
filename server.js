@@ -15,7 +15,7 @@ const TextDecoder = require("text-encoding").TextDecoder;
 /* hedera.js */
 const {
   Client,
-  ConsensusSubmitMessageTransaction,
+  ConsensusMessageSubmitTransaction,
   ConsensusTopicId,
   ConsensusTopicCreateTransaction,
   MirrorClient,
@@ -112,7 +112,7 @@ init(); // process arguments & handoff to runChat()
 /* have feedback, questions, etc.? please feel free to file an issue! */
 function sendHCSMessage(msg) {
   try {
-    new ConsensusSubmitMessageTransaction()
+    new ConsensusMessageSubmitTransaction()
       .setTopicId(topicId)
       .setMessage(msg)
       .execute(HederaClient);
