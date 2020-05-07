@@ -65,8 +65,8 @@ async function init() {
     try {
       logStatus = "default"
       configureAccount(process.env.ACCOUNT_ID, process.env.PRIVATE_KEY);
-      
-      await configureNewTopic();
+      configureExistingTopic("0.0.39828")
+      // await configureNewTopic();
       
       /* run & serve the express app */
       runChat();
@@ -80,10 +80,11 @@ async function init() {
 function runChat() {
   app.use(express.static("public"));
   const port = process.env.PORT || 3001;
-  // app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+  log("port:", port, logStatus);
   
   http.listen(port, function() {
-    const randomInstancePort = http.address().port;
+  const randomInstancePort = http.address().port;
+  log("randomInstancePort:", randomInstancePort, logStatus);
     // open("http://localhost:" + randomInstancePort);
    // open("https://hedera-hcs-chat-js.onrender.com:" + randomInstancePort);
     
@@ -111,13 +112,13 @@ init(); // process arguments & handoff to runChat()
 /* have feedback, questions, etc.? please feel free to file an issue! */
 function sendHCSMessage(msg) {
   try {
-    new ConsensusSubmitMessageTransaction()
+    new ConsensusMessageSubmitTransaction()
       .setTopicId(topicId)
       .setMessage(msg)
       .execute(HederaClient);
-    log("ConsensusSubmitMessageTransaction()", msg, logStatus);
+    log("ConsensusMessageSubmitTransaction()", msg, logStatus);
   } catch (error) {
-    log("ERROR: ConsensusSubmitMessageTransaction()", error, logStatus);
+    log("ERROR: ConsensusMessageSubmitTransaction()", error, logStatus);
     process.exit(1);
   }
 }
@@ -157,7 +158,7 @@ async function createNewTopic() {
     log("ConsensusTopicCreateTransaction()", `submitted tx ${txId}`, logStatus);
     await sleep(3000); // wait until Hedera reaches consensus
     const receipt = await txId.getReceipt(HederaClient);
-    const newTopicId = receipt.getTopicId();
+    const newTopicId = receipt.getConsensusTopicId();
     log(
       "ConsensusTopicCreateTransaction()",
       `success! new topic ${newTopicId}`,
