@@ -112,13 +112,13 @@ init(); // process arguments & handoff to runChat()
 /* have feedback, questions, etc.? please feel free to file an issue! */
 function sendHCSMessage(msg) {
   try {
-    new ConsensusMessageSubmitTransaction()
+    new ConsensusSubmitMessageTransaction()
       .setTopicId(topicId)
       .setMessage(msg)
       .execute(HederaClient);
-    log("ConsensusMessageSubmitTransaction()", msg, logStatus);
+    log("ConsensusSubmitMessageTransaction()", msg, logStatus);
   } catch (error) {
-    log("ERROR: ConsensusMessageSubmitTransaction()", error, logStatus);
+    log("ERROR: ConsensusSubmitMessageTransaction()", error, logStatus);
     process.exit(1);
   }
 }
