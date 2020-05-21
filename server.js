@@ -85,7 +85,7 @@ function runChat() {
   http.listen(port, function() {
   const randomInstancePort = http.address().port;
   log("randomInstancePort:", randomInstancePort, logStatus);
-    // open("http://localhost:" + randomInstancePort);
+    //open("http://localhost:" + randomInstancePort);
    // open("https://hedera-hcs-chat-js.onrender.com:" + randomInstancePort);
     
   });

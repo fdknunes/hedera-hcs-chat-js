@@ -1,0 +1,164 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style type="text/css">
+        #video {
+            border: 1px solid #999;
+            width: 98%;
+            max-width: 860px;
+        }
+        .error {
+            color: red;
+        }
+        .warn {
+            color: orange;
+        }
+        .info {
+            color: darkgreen;
+        }
+    </style>
+    <title>Using the Screen Capture API - Simple_screen_capture - code sample</title>
+</head>
+
+<body data-gr-c-s-loaded="true">
+
+    <p>This example shows you the contents of the selected part of your display.
+        Click the Start Capture button to begin.</p>
+
+    <p><button id="start">Start Capture</button>
+        <button id="stop">Stop Capture</button></p>
+
+    <video id="video" autoplay=""></video>
+    <br>
+
+    <p>A script on this page starts this clock:</p>
+    <p id="demo"></p>
+
+    <div class='analyze'>
+        <button id='analyze-button' class='analyze-button' type='button' onclick='analyze()'>Analyze</button>
+    </div>
+    <div class='result-label'>
+        <label id='result-label'></label>
+    </div>
+
+
+
+</body>
+
+</html>
+
+<script>
+
+    var el = x => document.getElementById(x);
+
+    const videoElem = document.getElementById("video");
+    const logElem = document.getElementById("log");
+    const startElem = document.getElementById("start");
+    const stopElem = document.getElementById("stop");
+    var myVar = setInterval(myTimer, 1000);
+    var id = setInterval(frame, 5000);
+    var capture = false;
+
+    // Set event listeners for the start and stop buttons
+    startElem.addEventListener("click", function (evt) {
+        startCapture();
+        capture = true;
+    }, false);
+
+    stopElem.addEventListener("click", function (evt) {
+        stopCapture();
+        clearInterval(id);
+    }, false);
+
+    //Function to Show the timer in the screen
+    function myTimer() {
+        var d = new Date();
+        var t = d.toLocaleTimeString();
+        document.getElementById("demo").innerHTML = t;
+    }
+
+    // Define Frame
+    function frame() {
+        if (capture) {
+            startElem.disabled = false;
+            takeASnap()
+                .then(streamToModel);
+        }
+    }
+
+    // Options for getDisplayMedia()
+    var displayMediaOptions = {
+        video: {
+            cursor: "always"
+        },
+        audio: false
+    };
+
+    async function startCapture() {
+        try {
+            videoElem.srcObject = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
+            dumpOptionsInfo();
+        } catch (err) {
+            console.error("Error: " + err);
+        }
+    }
+
+    function stopCapture(evt) {
+        let tracks = videoElem.srcObject.getTracks();
+        tracks.forEach(track => track.stop());
+        videoElem.srcObject = null;
+        clearInterval(id);
+    }
+
+    function dumpOptionsInfo() {
+        const videoTrack = videoElem.srcObject.getVideoTracks()[0];
+        console.info("Track settings:");
+        console.info(JSON.stringify(videoTrack.getSettings(), null, 2));
+        console.info("Track constraints:");
+        console.info(JSON.stringify(videoTrack.getConstraints(), null, 2));
+    }
+
+    function takeASnap() {
+        const canvas = document.createElement('canvas'); // create a canvas
+        const ctx = canvas.getContext('2d'); // get its context
+        canvas.width = videoElem.videoWidth; // set its size to the one of the video
+        canvas.height = videoElem.videoHeight;
+        ctx.drawImage(videoElem, 0, 0); // the vid
+
+        return new Promise((res, rej) => {
+            canvas.toBlob(res, 'image/jpeg'); // request a Blob from the canvas
+            //canvas.toDataURL("image/png");
+        });
+    }
+
+    function streamToModel(blob) {
+        //uses the <a streamToModel> to streamToModel a Blob
+        // let a = document.createElement('a');
+        // a.href = URL.createObjectURL(blob);
+        // a.streamToModel = 'zoom/screenshot.jpg';
+        // document.body.appendChild(a);
+        // a.click();
+
+        el("analyze-button").innerHTML = "Analyzing...";
+
+        var xhr = new XMLHttpRequest();
+        var loc = window.location
+        xhr.open('POST', `https://beartest-1g7n.onrender.com/analyze`, true);
+
+        xhr.onerror = function () { alert(xhr.responseText); }
+        xhr.onload = function (e) {
+            if (this.readyState === 4) {
+                var response = JSON.parse(e.target.responseText);
+                el('result-label').innerHTML = `Result = ${response['result']}`;
+            }
+        }
+
+        var file = new File([blob], "image.png", { type: "image/png", lastModified: new Date() });
+        var fileData = new FormData();
+        fileData.append('file', file);
+
+        xhr.send(fileData);
+    }
+
+</script>
