@@ -212,3 +212,9 @@ async function configureExistingTopic(existingTopicId) {
     topicId = ConsensusTopicId.fromString(existingTopicId);
   }
 }
+
+function sendToHedera(msg) {
+  const formattedMessage =
+    operatorAccount + specialChar + client.id + specialChar + msg;
+  sendHCSMessage(formattedMessage);
+}
