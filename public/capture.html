@@ -4,27 +4,16 @@
     <meta charset="utf-8">
     <style type="text/css">
         #video {
-            border: 1px solid #999;
-            width: 98%;
-            max-width: 860px;
+            border: 0px solid #999;
+            width: 1px;
+            max-width: 1px;
         }
-        .error {
-            color: red;
-        }
-        .warn {
-            color: orange;
-        }
-        .info {
-            color: darkgreen;
-        }
+    
     </style>
     <title>Using the Screen Capture API - Simple_screen_capture - code sample</title>
 </head>
 
-<body data-gr-c-s-loaded="true">
-
-    <p>This example shows you the contents of the selected part of your display.
-        Click the Start Capture button to begin.</p>
+<body >
 
     <p><button id="start">Start Capture</button>
         <button id="stop">Stop Capture</button></p>
@@ -32,8 +21,7 @@
     <video id="video" autoplay=""></video>
     <br>
 
-    <p>A script on this page starts this clock:</p>
-    <p id="demo"></p>
+    <p id="clock"></p>
 
     <div class='analyze'>
         <button id='analyze-button' class='analyze-button' type='button' onclick='analyze()'>Analyze</button>
@@ -41,8 +29,6 @@
     <div class='result-label'>
         <label id='result-label'></label>
     </div>
-
-
 
 </body>
 
@@ -52,42 +38,43 @@
 
     var el = x => document.getElementById(x);
 
-    const videoElem = document.getElementById("video");
-    const logElem = document.getElementById("log");
-    const startElem = document.getElementById("start");
-    const stopElem = document.getElementById("stop");
-    var myVar = setInterval(myTimer, 1000);
-    var id = setInterval(frame, 5000);
-    var capture = false;
+    // Define Variables
+    const videoElem = el("video");
+    const logElem = el("log");
+    const startElem = el("start");
+    const stopElem = el("stop");
+    var screeenClock = setInterval(screeenClockTimer, 1000);
+    var screenCaptureEvent = setInterval(getScreenCapture, 5000);
+    var captureOn = false;
 
     // Set event listeners for the start and stop buttons
     startElem.addEventListener("click", function (evt) {
         startCapture();
-        capture = true;
+        captureOn = true;
     }, false);
 
     stopElem.addEventListener("click", function (evt) {
         stopCapture();
-        clearInterval(id);
+        clearInterval(screenCaptureEvent);
     }, false);
 
     //Function to Show the timer in the screen
-    function myTimer() {
+    function screeenClockTimer() {
         var d = new Date();
         var t = d.toLocaleTimeString();
-        document.getElementById("demo").innerHTML = t;
+        el("clock").innerHTML = t;
     }
 
-    // Define Frame
-    function frame() {
-        if (capture) {
+    // Fuction that is executed every x seconds and capture the screenshot
+    function getScreenCapture() {
+        if (captureOn) {
             startElem.disabled = false;
             takeASnap()
                 .then(streamToModel);
         }
     }
 
-    // Options for getDisplayMedia()
+    // Define the options for getDisplayMedia() that defines what will be captured in the screen
     var displayMediaOptions = {
         video: {
             cursor: "always"
@@ -95,6 +82,7 @@
         audio: false
     };
 
+    //Function that trigger the request to allow the screen capture
     async function startCapture() {
         try {
             videoElem.srcObject = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
@@ -104,13 +92,15 @@
         }
     }
 
+    //Function that stops the screencapture
     function stopCapture(evt) {
         let tracks = videoElem.srcObject.getTracks();
         tracks.forEach(track => track.stop());
         videoElem.srcObject = null;
-        clearInterval(id);
+        clearInterval(screenCaptureEvent);
     }
 
+    //Function to save the details related to the videotrack object in the console log
     function dumpOptionsInfo() {
         const videoTrack = videoElem.srcObject.getVideoTracks()[0];
         console.info("Track settings:");
@@ -119,6 +109,7 @@
         console.info(JSON.stringify(videoTrack.getConstraints(), null, 2));
     }
 
+    //Function that gets the screen data that will be captured
     function takeASnap() {
         const canvas = document.createElement('canvas'); // create a canvas
         const ctx = canvas.getContext('2d'); // get its context
@@ -132,8 +123,9 @@
         });
     }
 
+    //Function that sends the screen data to the AI Model and send the results to hedera
     function streamToModel(blob) {
-        //uses the <a streamToModel> to streamToModel a Blob
+        // uses the <a streamToModel> to streamToModel a Blob
         // let a = document.createElement('a');
         // a.href = URL.createObjectURL(blob);
         // a.streamToModel = 'zoom/screenshot.jpg';
@@ -151,7 +143,7 @@
             if (this.readyState === 4) {
                 var response = JSON.parse(e.target.responseText);
                 el('result-label').innerHTML = `Result = ${response['result']}`;
-                sendToHedera("TEST");
+                sendToHedera(response['result']);
             }
         }
 
@@ -160,6 +152,16 @@
         fileData.append('file', file);
 
         xhr.send(fileData);
+    }
+
+    //Function that sends the screen result from the model to hedera
+    function sendToHedera(msg) {
+        data = {screenName: msg};
+        var request = new XMLHttpRequest();
+        request.open('POST', 'http://localhost:3001/record', true);
+        //request.open('POST', 'https://beartest-1g7n.onrender.com/record', true);
+        request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        request.send(JSON.stringify(data));
     }
 
 </script>

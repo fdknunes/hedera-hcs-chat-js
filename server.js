@@ -89,6 +89,29 @@ function runChat() {
    // open("https://hedera-hcs-chat-js.onrender.com:" + randomInstancePort);
     
   });
+
+
+  var bodyParser = require('body-parser');
+  app.use(bodyParser.json()); // for parsing application/json
+  app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+  // Where I should receive data from JS written in index.html
+  app.post('/record', function(req, res) {
+
+    var msg = req.body.screenName;
+    const formattedMessage =
+        operatorAccount + specialChar + msg;
+    sendHCSMessage(formattedMessage);
+    
+    console.log(formattedMessage);
+
+
+   
+  });
+
+
+
+  
+
   subscribeToMirror();
   io.on("connection", function(client) {
     io.emit(
